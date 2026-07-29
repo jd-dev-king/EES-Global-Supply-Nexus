@@ -51,3 +51,10 @@ __MACOSX/
 .idea/
 .vscode/
 *.swp
+
+# Railway/local runtime
+backend/data/*.db
+backend/data/*.sqlite
+backend/data/*.sqlite3
+.railway/
+railway.json

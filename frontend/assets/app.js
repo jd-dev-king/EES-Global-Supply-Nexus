@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const fallbackUrl = '/assets/seed.json';
+const API_BASE_URL = 'https://global-supply-api-production.up.railway.app/api';
+const fallbackUrl = './assets/seed.json';
+const apiUrl = (path) => `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 let dashboard;
 let nodeMeshes = [];
 let selectedSupplierId = null;
@@ -10,9 +12,26 @@ let workflowData = null;
 const $ = (selector) => document.querySelector(selector);
 const statusClass = (value) => value.toLowerCase().replaceAll(' ', '-');
 
+async function updateApiStatus() {
+  const badge = document.querySelector('#api-status');
+  if (!badge) return;
+  try {
+    const response = await fetch(apiUrl('/health'));
+    const payload = await response.json();
+    const online = response.ok && ['ok', 'online'].includes(String(payload.status).toLowerCase());
+    badge.classList.toggle('offline', !online);
+    badge.classList.toggle('online', online);
+    badge.textContent = online ? 'API ONLINE' : 'DEMO DATA';
+  } catch {
+    badge.classList.add('offline');
+    badge.classList.remove('online');
+    badge.textContent = 'DEMO DATA';
+  }
+}
+
 async function loadDashboard() {
   try {
-    const response = await fetch('/api/dashboard');
+    const response = await fetch(apiUrl('/dashboard'));
     if (!response.ok) throw new Error('API unavailable');
     return await response.json();
   } catch {
@@ -71,7 +90,7 @@ function selectSupplier(id) {
 async function simulate(scenario) {
   let result;
   try {
-    const response = await fetch(`/api/simulations/${scenario}`, {method:'POST'});
+    const response = await fetch(apiUrl(`/simulations/${scenario}`), {method:'POST'});
     if (!response.ok) throw new Error();
     result = await response.json();
   } catch {
@@ -138,7 +157,7 @@ function createScene(data) {
 
 
 async function loadWorkflow(){
-  try{const r=await fetch('/api/workflow');if(!r.ok)throw new Error();return await r.json();}
+  try{const r=await fetch(apiUrl('/workflow'));if(!r.ok)throw new Error();return await r.json();}
   catch{return {requisitions:dashboard.requisitions||[],receipts:dashboard.receipts||[],inspections:dashboard.inspections||[],releases:dashboard.material_releases||[],handoffs:dashboard.handoffs||[]};}
 }
 function badge(v){return `<span class="status ${statusClass(String(v))}">${v}</span>`}
@@ -170,10 +189,10 @@ function renderWorkflow(type='requisitions'){
 }
 async function workflowAction(action,id,type){
   const paths={'approve-pr':`/api/requisitions/${id}/approve`,'complete-inspection':`/api/inspections/${id}/complete`,'release-material':`/api/releases/${id}/release`};
-  try{const r=await fetch(paths[action],{method:'POST'});const result=await r.json();if(!r.ok)throw new Error(result.detail||'Workflow action failed');workflowData=await loadWorkflow();renderWorkflow(type)}catch(e){alert(e.message)}
+  try{const r=await fetch(apiUrl(paths[action].replace(/^\/api/, '')),{method:'POST'});const result=await r.json();if(!r.ok)throw new Error(result.detail||'Workflow action failed');workflowData=await loadWorkflow();renderWorkflow(type)}catch(e){alert(e.message)}
 }
 
 function updateClock(){ $('#clock').textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
 
-async function init(){dashboard=await loadDashboard();renderDashboard(dashboard);createScene(dashboard);workflowData=await loadWorkflow();renderWorkflow();document.querySelectorAll('.workflow-tab').forEach(b=>b.addEventListener('click',()=>renderWorkflow(b.dataset.workflow)));updateClock();setInterval(updateClock,1000);document.querySelectorAll('[data-scenario]').forEach(b=>b.addEventListener('click',()=>simulate(b.dataset.scenario)));$('#refresh').addEventListener('click',async()=>{dashboard=await loadDashboard();renderDashboard(dashboard);});}
+async function init(){updateApiStatus();dashboard=await loadDashboard();renderDashboard(dashboard);createScene(dashboard);workflowData=await loadWorkflow();renderWorkflow();document.querySelectorAll('.workflow-tab').forEach(b=>b.addEventListener('click',()=>renderWorkflow(b.dataset.workflow)));updateClock();setInterval(updateClock,1000);document.querySelectorAll('[data-scenario]').forEach(b=>b.addEventListener('click',()=>simulate(b.dataset.scenario)));$('#refresh').addEventListener('click',async()=>{updateApiStatus();dashboard=await loadDashboard();renderDashboard(dashboard);});}
 init();

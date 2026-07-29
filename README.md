@@ -2,7 +2,7 @@
 
 **Part 1 of the Enterprise Execution Suite**
 
-EES Global Supply Nexus is an interactive supply-chain digital twin for pharmaceutical procurement, supplier intelligence, inventory coverage, logistics risk, quality release, and manufacturing-readiness handoff. The application combines a Three.js command center with a FastAPI API and a reproducible SQLite demo database created from public seed data.
+EES Global Supply Nexus is an interactive supply-chain digital twin for pharmaceutical procurement, supplier intelligence, inventory coverage, logistics risk, quality release, and manufacturing-readiness handoff. The application combines a Three.js command center with a static GitHub Pages frontend, a Railway-hosted FastAPI API, and a reproducible SQLite demo database created from public seed data.
 
 ## Highlights
 
@@ -19,16 +19,16 @@ EES Global Supply Nexus is an interactive supply-chain digital twin for pharmace
 ## Architecture
 
 ```text
-Browser / Three.js Command Center
+GitHub Pages / Three.js Command Center
               │
               ▼
-        FastAPI REST API
+     Railway FastAPI REST API
               │
               ▼
-   SQLite runtime database
+   Ephemeral SQLite demo database
               │
               ▼
-       Public seed.json
+   backend/data/seed.json
 ```
 
 The runtime database is intentionally excluded from Git. It is recreated from `data/seed.json` whenever the FastAPI service starts, giving every user a deterministic demonstration environment.
@@ -45,10 +45,16 @@ pip install -r requirements.txt
 python3 -m uvicorn main:app --reload --port 8000
 ```
 
-Open:
+Local API health:
 
 ```text
-http://127.0.0.1:8000
+http://127.0.0.1:8000/api/health
+```
+
+Public API:
+
+```text
+https://global-supply-api-production.up.railway.app
 ```
 
 API documentation:
@@ -62,7 +68,7 @@ http://127.0.0.1:8000/docs
 The frontend includes a public JSON fallback for a backend-free preview:
 
 ```bash
-cd frontend
+cd docs
 python3 -m http.server 8080
 ```
 
@@ -72,9 +78,10 @@ Open `http://127.0.0.1:8080`. Transactional API actions require the FastAPI serv
 
 ```text
 architecture/   Integration contracts and workflow documentation
-backend/        FastAPI service and SQLite initialization
-frontend/       Three.js command center and static assets
-data/           Public deterministic seed data
+backend/        Railway FastAPI service and self-contained demo seed
+frontend/       Editable Three.js frontend source
+docs/           GitHub Pages deployment copy
+data/           Public deterministic source seed data
 ```
 
 ## Supply-to-production workflow
@@ -129,3 +136,11 @@ EES Portfolio Universe Exclusive by Jeremiah Lupton (JDL)
 ## License
 
 Released under the [MIT License](LICENSE).
+
+
+## Public deployment
+
+- Frontend: https://jd-dev-king.github.io/EES-Global-Supply-Nexus/
+- API: https://global-supply-api-production.up.railway.app
+- API health: https://global-supply-api-production.up.railway.app/api/health
+- Deployment instructions: `architecture/DEPLOYMENT.md`
