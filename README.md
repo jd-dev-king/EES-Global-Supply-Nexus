@@ -121,6 +121,10 @@ This repository intentionally excludes:
 
 Review `.gitignore` before adding new files. Never commit production credentials or private supplier data.
 
+## Author
+
+EES Portfolio Universe Exclusive by Jeremiah Lupton (JDL)
+
 ## License
 
 Released under the [MIT License](LICENSE).
