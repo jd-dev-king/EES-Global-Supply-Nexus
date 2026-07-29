@@ -1,0 +1,53 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Runtime databases and logs
+*.db
+*.sqlite
+*.sqlite3
+*.log
+logs/
+
+# Node / frontend build output
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.vite/
+
+# Temporary and generated files
+.cache/
+tmp/
+temp/
+*.zip
+*.mov
+*.mp4
+
+# IDE and operating system
+.DS_Store
+__MACOSX/
+.idea/
+.vscode/
+*.swp
